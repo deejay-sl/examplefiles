@@ -1,0 +1,325 @@
+# CDDL HEADER START
+#
+# The contents of this file are subject to the terms of the
+# Common Development and Distribution License, Version 1.0 only
+# (the "License").  You may not use this file except in compliance
+# with the License.
+#
+# You can obtain a copy of the license at legal-notices/CDDLv1_0.txt
+# or http://forgerock.org/license/CDDLv1.0.html.
+# See the License for the specific language governing permissions
+# and limitations under the License.
+#
+# When distributing Covered Code, include this CDDL HEADER in each
+# file and include the License file at legal-notices/CDDLv1_0.txt.
+# If applicable, add the following below this CDDL HEADER, with the
+# fields enclosed by brackets "[]" replaced with your own identifying
+# information:
+#      Portions Copyright [yyyy] [name of copyright owner]
+#
+# CDDL HEADER END
+#
+#      Copyright 2006-2008 Sun Microsystems, Inc.
+#      Portions Copyright 2012-2014 ForgeRock AS
+#
+#
+# dc=com sample LDIF file
+#
+# Schema definition for use with Class of Service collective attributes:
+#
+#dn: cn=schema
+#changetype: modify
+#add: attributeTypes
+#attributeTypes: ( example-class-of-service-attribute-type NAME 'classOfService
+# ' EQUALITY caseIgnoreMatch ORDERING caseIgnoreOrderingMatch SUBSTR caseIgnore
+# SubstringsMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 SINGLE-VALUE USAGE user
+# Applications X-ORIGIN 'OpenDJ Documentation Examples' )
+#-
+#add: attributeTypes
+#attributeTypes: ( example-class-of-service-disk-quota NAME 'diskQuota
+# ' EQUALITY caseIgnoreMatch ORDERING caseIgnoreOrderingMatch SUBSTR case
+# IgnoreSubstringsMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 USAGE user
+# Applications X-ORIGIN 'OpenDJ Documentation Examples' )
+#-
+#add: attributeTypes
+#attributeTypes: ( example-class-of-service-mail-quota NAME 'mailQuota
+# ' EQUALITY caseIgnoreMatch ORDERING caseIgnoreOrderingMatch SUBSTR case
+# IgnoreSubstringsMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 USAGE user
+# Applications X-ORIGIN 'OpenDJ Documentation Examples' )
+#-
+#add: objectClasses
+#objectClasses: ( example-class-of-service-object-class NAME 'cos' SUP top AUX
+# ILIARY MAY ( classOfService $ diskQuota $ mailQuota ) X-ORIGIN 'OpenDJ Doc
+# umentation Examples' )
+#
+
+dn: dc=com
+objectClass: domain
+objectClass: top
+dc: com
+
+dn: dc=saucelabs,dc=com
+objectClass: domain
+objectClass: top
+dc: saucelabs
+aci: (target ="ldap:///dc=saucelabs,dc=com")(targetattr !=
+ "userPassword")(version 3.0;acl "Anonymous read-search access";
+ allow (read, search, compare)(userdn = "ldap:///anyone");)
+aci: (target="ldap:///dc=saucelabs,dc=com") (targetattr =
+ "*")(version 3.0; acl "allow all Admin group"; allow(all,export,import,proxy
+ ) groupdn = "ldap:///cn=Directory Administrators,ou=Groups,dc=saucelabs,dc=com";)
+aci: (target="ldap:///dc=saucelabs,dc=com") (targetattr ="*
+ ")(version 3.0; acl "Allow apps proxied auth"; allow(all, proxy
+ )(userdn = "ldap:///cn=*,ou=Apps,dc=saucelabs,dc=com");)
+aci: (targetcontrol="1.2.840.113556.1.4.805") (version 3.0; acl "
+ Tree delete for Admins"; allow(all) groupdn ="
+ ldap:///cn=Directory Administrators,ou=Groups,dc=saucelabs,dc=com";)
+
+dn: ou=Company Servers,dc=saucelabs,dc=com
+objectClass: organizationalUnit
+objectClass: top
+description: Standard branch for Company Server registration
+ou: Company Servers
+
+dn: ou=Groups,dc=saucelabs,dc=com
+objectClass: organizationalunit
+objectClass: top
+ou: Groups
+
+dn: cn=Accounting Managers,ou=groups,dc=saucelabs,dc=com
+objectClass: groupOfUniqueNames
+objectClass: top
+ou: groups
+description: People who can manage accounting entries
+uniquemember: uid=scarter, ou=People, dc=saucelabs,dc=com
+uniquemember: uid=tmorris, ou=People, dc=saucelabs,dc=com
+cn: Accounting Managers
+
+dn: cn=Directory Administrators,ou=Groups,dc=saucelabs,dc=com
+objectClass: groupofuniquenames
+objectClass: top
+ou: Groups
+cn: Directory Administrators
+uniquemember: uid=kvaughan, ou=People, dc=saucelabs,dc=com
+uniquemember: uid=rdaugherty, ou=People, dc=saucelabs,dc=com
+uniquemember: uid=hmiller, ou=People, dc=saucelabs,dc=com
+
+dn: cn=HR Managers,ou=groups,dc=saucelabs,dc=com
+objectClass: groupOfUniqueNames
+objectClass: top
+ou: groups
+description: People who can manage HR entries
+uniquemember: uid=kvaughan, ou=People, dc=saucelabs,dc=com
+uniquemember: uid=cschmith, ou=People, dc=saucelabs,dc=com
+cn: HR Managers
+
+dn: cn=PD Managers,ou=groups,dc=saucelabs,dc=com
+objectClass: groupOfUniqueNames
+objectClass: top
+ou: groups
+description: People who can manage engineer entries
+uniquemember: uid=kwinters, ou=People, dc=saucelabs,dc=com
+uniquemember: uid=trigden, ou=People, dc=saucelabs,dc=com
+cn: PD Managers
+
+dn: cn=QA Managers,ou=groups,dc=saucelabs,dc=com
+objectClass: groupOfUniqueNames
+objectClass: top
+ou: groups
+description: People who can manage QA entries
+uniquemember: uid=abergin, ou=People, dc=saucelabs,dc=com
+uniquemember: uid=jwalker, ou=People, dc=saucelabs,dc=com
+cn: QA Managers
+
+dn: ou=People,dc=saucelabs,dc=com
+objectClass: organizationalunit
+objectClass: top
+ou: People
+aci: (target ="ldap:///ou=People,dc=saucelabs,dc=com")(targetattr =
+ "userpassword || telephonenumber || facsimiletelephonenumber")(version 3.0;
+ acl "Allow self entry modification";allow (write)(userdn = "ldap:///self");)
+aci: (target ="ldap:///ou=People,dc=saucelabs,dc=com")(targetattr !=
+ "cn || sn || uid")(targetfilter ="(ou=Accounting)")(version 3.0;
+ acl "Accounting Managers Group Permissions";allow (write) (groupdn =
+  "ldap:///cn=Accounting Managers,ou=groups,dc=saucelabs,dc=com");)
+aci: (target ="ldap:///ou=People,dc=saucelabs,dc=com")(targetattr !=
+ "cn || sn || uid")(targetfilter ="(ou=Human Resources)")(version 3.0;
+ acl "HR Group Permissions";allow (write)(groupdn = "ldap:///cn=HR Managers,
+ ou=groups,dc=saucelabs,dc=com
+ ");)
+aci: (target ="ldap:///ou=People,dc=saucelabs,dc=com")(targetattr !=
+ "cn ||sn || uid")(targetfilter ="(ou=Product Testing)")(version 3.0;
+ acl "QA Group Permissions";allow (write)(groupdn = "ldap:///cn=QA Managers,
+ ou=groups,dc=saucelabs,dc=com");)
+aci: (target ="ldap:///ou=People,dc=saucelabs,dc=com")(targetattr !=
+ "cn || sn || uid")(targetfilter ="(ou=Product Development)")(version 3.0;
+ acl "Engineering Group Permissions";allow (write)(groupdn = "ldap:///
+ cn=PD Managers,ou=groups,dc=saucelabs,dc=com");)
+
+dn: uid=abarnes,ou=People,dc=saucelabs,dc=com
+objectClass: person
+#objectClass: cos
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: posixAccount
+objectClass: top
+uid: abarnes
+#classOfService: gold
+userpassword: chevron
+facsimiletelephonenumber: +1 408 555 4661
+givenname: Anne-Louise
+cn: Anne-Louise Barnes
+telephonenumber: +1 408 555 9445
+sn: Barnes
+roomnumber: 2290
+homeDirectory: /home/abarnes
+mail: abarnes@saucelabs.com
+l: Lysaker
+manager: uid=scarter, ou=People, dc=saucelabs,dc=com
+ou: Payroll
+ou: People
+uidNumber: 1119
+gidNumber: 1000
+
+dn: cn=quantum dot,uid=nbohr,ou=People,dc=saucelabs,dc=com
+objectClass: device
+objectClass: top
+cn: quantum dot
+serialNumber: WI-3005
+owner: uid=nbohr,ou=People,dc=saucelabs,dc=com
+
+dn: cn=qubit generator,uid=nbohr,ou=People,dc=saucelabs,dc=com
+objectClass: device
+objectClass: top
+cn: qubit generator
+serialNumber: XF551426
+owner: uid=nbohr,ou=People,dc=saucelabs,dc=com
+
+# Quotas by class of service
+dn: cn=Bronze Class of Service,dc=saucelabs,dc=com
+objectClass: collectiveAttributeSubentry
+objectClass: extensibleObject
+objectClass: subentry
+objectClass: top
+cn: Bronze Class of Service
+diskQuota;collective: 10 GB
+mailQuota;collective: 1 GB
+subtreeSpecification: { base "ou=People", specificationFilter "(classOfService=
+ bronze)" }
+
+dn: cn=Silver Class of Service,dc=saucelabs,dc=com
+objectClass: collectiveAttributeSubentry
+objectClass: extensibleObject
+objectClass: subentry
+objectClass: top
+cn: Silver Class of Service
+diskQuota;collective: 50 GB
+mailQuota;collective: 5 GB
+subtreeSpecification: { base "ou=People", specificationFilter "(classOfService=
+ silver)" }
+
+dn: cn=Gold Class of Service,dc=saucelabs,dc=com
+objectClass: collectiveAttributeSubentry
+objectClass: extensibleObject
+objectClass: subentry
+objectClass: top
+cn: Gold Class of Service
+diskQuota;collective: 100 GB
+mailQuota;collective: 10 GB
+subtreeSpecification: { base "ou=People", specificationFilter "(classOfService=
+ gold)" }
+
+dn: ou=Special Users,dc=saucelabs,dc=com
+objectClass: organizationalUnit
+objectClass: top
+description: Special Administrative Accounts
+ou: Special Users
+
+dn: ou=Apps,dc=saucelabs,dc=com
+objectClass: organizationalUnit
+objectClass: top
+ou: Apps
+
+dn: cn=Inherit Department Number From Manager,dc=saucelabs,dc=com
+objectClass: top
+objectClass: subentry
+objectClass: inheritedCollectiveAttributeSubentry
+objectClass: inheritedFromDNCollectiveAttributeSubentry
+cn: Inherit Department Number From Manager
+subtreeSpecification: { base "ou=People" }
+inheritFromDNAttribute: manager
+inheritAttribute: departmentNumber
+
+dn: cn=Inherit From Locality,dc=saucelabs,dc=com
+objectClass: top
+objectClass: subentry
+objectClass: inheritedCollectiveAttributeSubentry
+objectClass: inheritedFromRDNCollectiveAttributeSubentry
+cn: Inherit From Locality
+subtreeSpecification: { base "ou=People" }
+inheritFromBaseRDN: ou=Locations
+inheritFromRDNAttribute: l
+inheritFromRDNType: l
+inheritAttribute: preferredLanguage
+inheritAttribute: street
+collectiveConflictBehavior: real-overrides-virtual
+
+dn: cn=My App,ou=Apps,dc=saucelabs,dc=com
+cn: My App
+objectClass: person
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: top
+sn: App
+userPassword: password
+ds-privilege-name: proxied-auth
+
+dn: ou=Locations,dc=saucelabs,dc=com
+objectClass: organizationalunit
+objectClass: top
+ou: Locations
+
+dn: l=Bristol,ou=Locations,dc=saucelabs,dc=com
+objectClass: top
+objectClass: locality
+objectClass: extensibleObject
+l: Bristol
+street: 60 Queen Square
+preferredLanguage: en-gb
+
+dn: l=Montbonnot,ou=Locations,dc=saucelabs,dc=com
+objectClass: top
+objectClass: locality
+objectClass: extensibleObject
+l: Montbonnot
+street: 55 Rue Blaise Pascal
+preferredLanguage: fr
+
+dn: l=Lysaker,ou=Locations,dc=saucelabs,dc=com
+objectClass: top
+objectClass: locality
+objectClass: extensibleObject
+l: Lysaker
+street: Lysaker Torg 2
+preferredLanguage: no
+
+dn: l=San Francisco,ou=Locations,dc=saucelabs,dc=com
+objectClass: top
+objectClass: locality
+objectClass: extensibleObject
+l: San Francisco
+street: 500 3rd Street
+preferredLanguage: en
+
+# Create a new base DN, dc=ref,dc=com, before importing these entries:
+dn: dc=ref,dc=com
+objectClass: domain
+objectClass: top
+dc: ref
+
+dn: dc=references,dc=ref,dc=com
+dc: references
+objectClass: extensibleObject
+objectClass: referral
+objectClass: top
+ref: ldap:///dc=saucelabs,dc=com
